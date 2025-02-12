@@ -71,11 +71,11 @@ export class ReportService {
 
     // Fetch paginated results
     const data = await this.databaseService.crimeReport.findMany({
-      where: { ...filters, hidden: false },
+      where: { ...filters, hidden: false},
       include: {
         user: true,
-        media:true,
         votes: true,
+        media: true,
         comments: {
           include: {
             media: true
