@@ -108,7 +108,7 @@ export default function ForgetPasswordPreview() {
       console.log("Response:", result);
     } catch (error) {
       console.error("Error submitting form:", error);
-      alert("Failed to submit the form. Please try again.");
+      alert("Phone number has already been used!");
     }
   }
 
