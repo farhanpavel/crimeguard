@@ -24,6 +24,7 @@ import { userData, columns } from "./_datatable/action";
 import { Input } from "@/components/ui/input";
 import { GiEntryDoor } from "react-icons/gi";
 import { useUserContext } from "@/components/tableContext/page";
+import Cookies from "js-cookie";
 export default function Page() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [dataAll, setData] = useState<userData[]>([]);
@@ -34,8 +35,7 @@ export default function Page() {
   });
   const [nameFilter, setNameFilter] = useState("");
   useEffect(() => {
-    const token =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjM0NTY2NDM4LTZjNGItNDI4OS04ZGZiLWI5Yjc2MjRlMTVmNCIsImlhdCI6MTczOTIwODk0MSwiZXhwIjoxNzM5ODEzNzQxfQ.ttWtamlCajMnCOGm625qUQMyOvwn-6x8K5Aa-jZoxx0";
+    const token = Cookies.get("accessToken");
 
     const fetchData = async () => {
       try {
