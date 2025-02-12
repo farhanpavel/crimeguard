@@ -24,7 +24,12 @@ export class FirebaseController {
     );
   }
 
-  @Post('to-topic')
+  @Post("subscribe")
+  async subscribeToTopic(@Body() body: { token: string; topic: string }) {
+    return await this.firebaseService.subscribeToTopic(body.token, body.topic);
+  }
+
+  @Post("to-topic")
   async sendNotificationToTopic(
     @Body() body: { topic: string; data: any; notification?: any }
   ) {
