@@ -25,6 +25,7 @@ export const sendOTP = async (phoneNumber: string) => {
     return otp;
   } catch (error) {
     console.log(error);
+    console.log(error);
     return new BadRequestException("Error sending OTP");
   }
 };
