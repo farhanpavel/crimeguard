@@ -75,7 +75,7 @@ export default function LoginPreview() {
 
       const result = await response.json();
       console.log("Response:", result);
-      alert("Registration successful!");
+      alert("Login successful!");
       Cookies.set("accessToken", result.accessToken);
       Cookies.set("refreshToken", result.refreshToken);
       Cookies.set("role", result.role);

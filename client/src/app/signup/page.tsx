@@ -91,12 +91,12 @@ export default function RegisterPreview() {
       Cookies.set("accessToken", result.accessToken);
       Cookies.set("refreshToken", result.refreshToken);
 
-      alert("Registration successful!");
+      alert("Successfully signed up!");
       router.push("/signup/verify");
       console.log("Response:", result);
     } catch (error) {
       console.error("Error submitting form:", error);
-      alert("Failed to submit the form. Please try again.");
+      alert("There was error while signing up. Please try again.");
     }
   }
 
