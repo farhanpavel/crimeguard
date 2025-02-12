@@ -41,17 +41,16 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
-  useEffect(() => {
-    if(messaging){
-        onMessage(messaging,(payload)=>{
-            console.log("FCM Got",payload)
-        })
-    }
-    else{
-        alert('exist korena')
-    }
-  }, [])
-  
+  // useEffect(() => {
+  //   if(messaging){
+  //       onMessage(messaging,(payload)=>{
+  //           console.log("FCM Got",payload)
+  //       })
+  //   }
+  //   else{
+  //       alert('exist korena')
+  //   }
+  // }, [])
 
   return (
     <UserContext.Provider value={{ users, setUsers, updateUserStatus }}>
