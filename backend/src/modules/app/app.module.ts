@@ -26,6 +26,7 @@ import { SocketGateway } from "../socket/socket.gateway";
     FirebaseModule
   ],
   controllers: [AppController],
-  providers: [AppService, SocketGateway]
+  providers: [AppService, SocketGateway],
+  exports: [SocketGateway]
 })
 export class AppModule {}
