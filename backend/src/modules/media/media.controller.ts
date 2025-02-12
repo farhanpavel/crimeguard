@@ -16,4 +16,13 @@ export class MediaController {
       throw new BadRequestException('Invalid file type.');
     });
   }
+
+  @Post('upload-with-watermark')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadImageWithWatermarkToCloudinary(@UploadedFile() file: Multer.File) {
+    return await this.mediaService.uploadImageWithWatermark(file).catch((e) => {
+      console.error(e);
+      throw new BadRequestException('Invalid file type.');
+    });
+  }
 }
