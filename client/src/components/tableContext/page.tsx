@@ -1,5 +1,4 @@
 "use client";
-import { getToken } from "firebase/messaging";
 import {
   createContext,
   useState,
@@ -8,13 +7,8 @@ import {
   SetStateAction,
   useEffect,
 } from "react";
-import { io } from "socket.io-client";
-import FcmTokenComp from "../Firebase/page";
-import "react-toastify/dist/ReactToastify.css";
-import { ToastContainer, toast } from "react-toastify";
-
-const socket = io("ws://localhost:1337");
-
+import { messaging } from "../Firebase/page";
+import { onMessage } from "firebase/messaging";
 export type UserData = {
   id: string;
   email: string;
@@ -47,45 +41,20 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
-  // useEffect(() => {
-  //   if(messaging){
-  //       onMessage(messaging,(payload)=>{
-  //           console.log("FCM Got",payload)
-  //       })
-  //   }
-  //   else{
-  //       alert('exist korena')
-  //   }
-  // }, [])
-
-  useEffect(() => {
-    //subscribe to news topic with fcm
-    //post to news topic with fcm token
-
-    // Request permission for notifications
-    if (Notification.permission !== "granted") {
-      Notification.requestPermission();
-    }
-
-    socket.on("news", (data) => {
-      console.log("Received:", data);
-
-      // Show browser notification if permission is granted
-      if (Notification.permission === "granted") {
-        new Notification(data.title, {
-          body: data.content,
-        });
-      }
-      toast.info(`${data.title}: ${data.content}`);
-    });
-
-    socket.emit("subscribeTopic", "news");
-  }, []);
+//   useEffect(() => {
+//     if(messaging){
+//         onMessage(messaging,(payload)=>{
+//             console.log("FCM Got",payload)
+//         })
+//     }
+//     else{
+//         alert('exist korena')
+//     }
+//   }, [])
+  
 
   return (
     <UserContext.Provider value={{ users, setUsers, updateUserStatus }}>
-      <FcmTokenComp />
-      <ToastContainer position="top-right" autoClose={3000} />
       {children}
     </UserContext.Provider>
   );

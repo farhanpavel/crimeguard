@@ -11,19 +11,19 @@ export default function Landing({
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const role = Cookies.get("role");
+  // useEffect(() => {
+  //   const role = Cookies.get("role");
 
-    if (role !== "USER") {
-      router.back();
-    } else {
-      setIsLoading(false);
-    }
-  }, [router]);
+  //   if (role !== "USER") {
+  //     router.back();
+  //   } else {
+  //     setIsLoading(false);
+  //   }
+  // }, [router]);
 
-  if (isLoading) {
-    return <div></div>;
-  }
+  // if (isLoading) {
+  //   return <div></div>;  
+  // }
   return (
     <div className="bg-[#F0F4F4] flex">
       <UserSidebar />
