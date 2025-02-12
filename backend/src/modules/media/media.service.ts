@@ -36,7 +36,7 @@ export class MediaService {
       console.log(metadata);
   
       // Calculate the watermark size (10% of the image width)
-      const watermarkWidth = Math.round(metadata.width! * 0.2);
+      const watermarkWidth = Math.round(metadata.width! * 0.5);
       const watermarkHeight = watermarkWidth; // Ensure it's square
   
       // Fetch the watermark image from the URL
@@ -50,7 +50,7 @@ export class MediaService {
   
       // Composite the watermark onto the original image
       const watermarkedImage = await image
-        .composite([{ input: watermark, gravity: 'northeast' }]) // Top-right corner
+        .composite([{ input: watermark, gravity: 'center' }]) // Center
         .toBuffer();
   
       console.log(watermarkedImage);

@@ -1,10 +1,14 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { CreateCommentDto } from "./dto/create-comment.dto";
 import { DatabaseService } from "src/modules/database/database.service";
+import { SocketGateway } from "../socket/socket.gateway";
 
 @Injectable()
 export class CommentService {
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(
+    private readonly databaseService: DatabaseService,
+    private readonly socketGateway: SocketGateway
+  ) {}
   async commentOnReport(
     userId: string,
     reportId: string,
@@ -46,6 +50,20 @@ export class CommentService {
           commentId: comment.id
         }
       });
+    });
+
+    this.socketGateway.sendMessage(`${report.userId}`, {
+      title: `New Comment`,
+      content: `${user.name} commented on your crime report`,
+      date: new Date().toISOString()
+    });
+
+    await this.databaseService.notifcaiton.create({
+      data: {
+        title: `New Comment`,
+        body: `${user.name} commented on your crime report`,
+        userId: report.userId
+      }
     });
 
     return {

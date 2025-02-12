@@ -12,6 +12,7 @@ import { io } from "socket.io-client";
 import FcmTokenComp from "../Firebase/page";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer, toast } from "react-toastify";
+import Cookies from "js-cookie";
 
 const socket = io("ws://localhost:1337");
 
@@ -50,10 +51,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
  
 
   useEffect(() => {
-    //subscribe to news topic with fcm 
-    //post to news topic with fcm token
-    
-
+  
     // Request permission for notifications
     if (Notification.permission !== "granted") {
       Notification.requestPermission();
@@ -70,6 +68,20 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       }
       toast.info(`${data.title}: ${data.content}`);
     });
+    const userId = Cookies.get("userId");
+    if (userId) {
+      socket.on(userId, (data) => {
+        console.log("Received:", data);
+
+        // Show browser notification if permission is granted
+        if (Notification.permission === "granted") {
+          new Notification(data.title, {
+            body: data.content
+          });
+        }
+        toast.info(`${data.title}: ${data.content}`);
+      });
+    }
 
     socket.emit("subscribeTopic", "news");
   }, []);
