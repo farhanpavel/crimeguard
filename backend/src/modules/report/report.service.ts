@@ -2,10 +2,11 @@ import { Injectable } from "@nestjs/common";
 import { CreateReportDto } from "./dto/create-report.dto";
 import { UpdateReportDto } from "./dto/update-report.dto";
 import { DatabaseService } from "../database/database.service";
+import { SocketGateway } from "../socket/socket.gateway";
 
 @Injectable()
 export class ReportService {
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(private readonly databaseService: DatabaseService, private readonly socketGateway: SocketGateway) {}
   async post(userId: string, createReportDto: CreateReportDto) {
     if(createReportDto.isAnonymous === null || createReportDto.isAnonymous === undefined){
       createReportDto.isAnonymous = false;
@@ -146,6 +147,12 @@ export class ReportService {
   }
 
   async doUpvote(reportId: string, userId: string) {
+    const user  = await this.databaseService.user.findUnique({
+      where: {
+        id: userId
+      }
+    });
+
     const report = await this.databaseService.crimeReport.findUnique({
       where: {
         id: reportId
@@ -192,12 +199,34 @@ export class ReportService {
         userId: userId
       }
     });
+
+    this.socketGateway.sendMessage(`${report.userId}`, {
+      title: `New Vote`,
+      content: `${user.name} downvoted your report`,
+      date: new Date().toISOString()
+    });
+
+    await this.databaseService.notifcaiton.create({
+      data: {
+        title: `New Vote`,
+        body: `${user.name} downvoted your report`,
+        userId: report.userId
+      }
+    });
+
     return {
       message: "Report upvoted successfully"
     };
   }
 
   async doDownVote(reportId: string, userId: string) {
+
+    const user = await this.databaseService.user.findUnique({
+      where: {
+        id: userId
+      }
+    });
+
     const report = await this.databaseService.crimeReport.findUnique({
       where: {
         id: reportId
@@ -244,6 +273,21 @@ export class ReportService {
         userId: userId
       }
     });
+
+    this.socketGateway.sendMessage(`${report.userId}`, {
+      title: `New Vote`,
+      content: `${user.name} downvoted your report`,
+      date: new Date().toISOString()
+    });
+
+    await this.databaseService.notifcaiton.create({
+      data: {
+        title: `New Vote`,
+        body: `${user.name} downvoted your report`,
+        userId: report.userId
+      }
+    });
+
     return {
       message: "Report downvoted successfully"
     };

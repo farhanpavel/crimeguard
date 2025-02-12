@@ -87,6 +87,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <UserContext.Provider value={{ users, setUsers, updateUserStatus }}>
+       <ToastContainer position="top-right" autoClose={3000} />
       {children}
     </UserContext.Provider>
   );

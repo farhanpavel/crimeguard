@@ -90,6 +90,7 @@ export default function RegisterPreview() {
       const result = await response.json();
       Cookies.set("accessToken", result.accessToken);
       Cookies.set("refreshToken", result.refreshToken);
+      Cookies.set("userId",result.id);
 
       alert("Successfully signed up!");
       router.push("/signup/verify");
