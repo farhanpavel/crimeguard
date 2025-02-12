@@ -17,7 +17,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { url } from "@/components/Url/page";
 import { FaBahai } from "react-icons/fa";
+import { Switch } from "@/components/ui/switch";
 import Cookies from "js-cookie";
+
 export default function Page() {
   const [files, setFiles] = useState([]);
   const [title, setTitle] = useState("");
@@ -26,8 +28,14 @@ export default function Page() {
   const [district, setDistrict] = useState("");
   const [crimeTime, setCrimeTime] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAnonymous, setIsAnonymous] = useState(false); // Default to false
 
   const router = useRouter();
+
+  // Handle switch toggle
+  const handleSwitchToggle = (checked) => {
+    setIsAnonymous(checked); // Update the state directly
+  };
 
   const handleFileChange = async (event) => {
     const selectedFiles = Array.from(event.target.files);
@@ -59,6 +67,7 @@ export default function Page() {
       return null;
     }
   };
+
   const handleGenerateDescription = async () => {
     if (files.length > 0) {
       // Find the first image file in the files array
@@ -76,6 +85,7 @@ export default function Page() {
       alert("Please upload a file first.");
     }
   };
+
   const handleDeleteFile = (index) => {
     setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
   };
@@ -91,7 +101,7 @@ export default function Page() {
           const formData = new FormData();
           formData.append("file", file);
 
-          const response = await fetch(`${url}/media/upload`, {
+          const response = await fetch(`${url}/media/upload-with-watermark`, {
             method: "POST",
             body: formData,
           });
@@ -119,6 +129,7 @@ export default function Page() {
         district,
         crimeTime: isoCrimeTime,
         media: mediaUrls,
+        isAnonymous,
       };
 
       console.log(reportData);
@@ -169,7 +180,7 @@ export default function Page() {
               <CardHeader className="space-y-4">
                 <Button
                   className="flex items-center gap-x-2 bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-500 text-white px-4 py-2 rounded-lg shadow-md hover:from-blue-600 hover:via-purple-600 hover:to-indigo-600 transition-all"
-                  onClick={handleGenerateDescription} // Add onClick handler
+                  onClick={handleGenerateDescription}
                 >
                   Generate <FaBahai />
                 </Button>
@@ -220,6 +231,14 @@ export default function Page() {
                       />
                     </div>
                     <div className="space-y-5 ">
+                      <div className="flex items-center space-x-2">
+                        <Switch
+                          id="privacy-mode"
+                          checked={isAnonymous}
+                          onCheckedChange={handleSwitchToggle} // Use onCheckedChange
+                        />
+                        <Label htmlFor="privacy-mode">Anonymous Mode</Label>
+                      </div>
                       <div className="space-y-2 ">
                         <Label className="text-xs" htmlFor="name">
                           Title
