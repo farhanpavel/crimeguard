@@ -5,8 +5,10 @@ import {
   useContext,
   Dispatch,
   SetStateAction,
+  useEffect,
 } from "react";
-
+import { messaging } from "../Firebase/page";
+import { onMessage } from "firebase/messaging";
 export type UserData = {
   id: string;
   email: string;
@@ -38,6 +40,18 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       prevUsers.map((user) => (user.id === id ? { ...user, isBanned } : user))
     );
   };
+
+  useEffect(() => {
+    if(messaging){
+        onMessage(messaging,(payload)=>{
+            console.log("FCM Got",payload)
+        })
+    }
+    else{
+        alert('exist korena')
+    }
+  }, [])
+  
 
   return (
     <UserContext.Provider value={{ users, setUsers, updateUserStatus }}>

@@ -74,6 +74,7 @@ export class ReportService {
       where: { ...filters, hidden: false },
       include: {
         user: true,
+        media:true,
         votes: true,
         comments: {
           include: {
