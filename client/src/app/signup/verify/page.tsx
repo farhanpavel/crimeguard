@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+
 import { PhoneInput } from "@/components/ui/phone-input";
 import {
   Form,
@@ -23,6 +24,7 @@ import {
 import { url } from "@/components/Url/page";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 // Phone number schema validation
 const formSchema = z.object({
   phone: z
@@ -55,7 +57,20 @@ export default function ForgetPasswordPreview() {
       phone: "",
     },
   });
-
+  const [isLoading, setLoading] = useState(true);
+  useEffect(() => {
+    const role = Cookies.get("role");
+    if (role === "ADMIN") {
+      router.push("/admindashboard/overview");
+    } else if (role === "USER") {
+      router.push("/userdashboard/overview");
+    } else {
+      setLoading(false);
+    }
+  });
+  if (isLoading) {
+    return <div></div>;
+  }
   const accessToken = Cookies.get("accessToken");
   const refreshToken = Cookies.get("refreshToken");
 
