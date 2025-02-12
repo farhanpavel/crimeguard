@@ -2,11 +2,56 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { zodResolver } from '@hookform/resolvers/zod'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import React from 'react'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
 
 const LoginPreview = () => {
+    const router = useRouter();
     
+    const formSchema = z.object({
+      email: z.string().email({ message: "Invalid email address" }),
+      password: z
+        .string()
+        .min(6, { message: "Password must be at least 6 characters long" })
+        .regex(/[a-zA-Z0-9]/, { message: "Password must be alphanumeric" }),
+    });
+
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      const response = await fetch(`${'url'}/auth/local/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to register. Please try again.");
+      }
+
+      const result = await response.json();
+      console.log("Response:", result);
+      alert("Registration successful!");
+      router.push("/admindashboard");
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      alert("Failed to submit the form. Please try again.");
+    }
+  }
   return (
     <div className="flex flex-col min-h-screen h-full w-full items-center justify-center px-4">
       <Card className="mx-auto max-w-sm">
