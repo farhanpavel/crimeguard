@@ -3,7 +3,9 @@ import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { ConfigModule } from "@nestjs/config";
 import { AuthModule } from "../auth/auth.module";
-import { MediaModule } from "../media/media/media.module";
+import { MediaModule } from "../media/media.module";
+import { CommentModule } from "../comment/comment.module";
+import { AdminModule } from "../admin/admin.module";
 
 @Module({
   imports: [
@@ -12,7 +14,9 @@ import { MediaModule } from "../media/media/media.module";
       cache: true
     }),
     AuthModule,
-    MediaModule
+    AdminModule,
+    MediaModule,
+    CommentModule
   ],
   controllers: [AppController],
   providers: [AppService]
