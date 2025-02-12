@@ -1,5 +1,4 @@
 "use client";
-import { getToken } from "firebase/messaging";
 import {
   createContext,
   useState,
@@ -88,8 +87,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <UserContext.Provider value={{ users, setUsers, updateUserStatus }}>
-      <FcmTokenComp />
-      <ToastContainer position="top-right" autoClose={3000} />
       {children}
     </UserContext.Provider>
   );

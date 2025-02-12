@@ -22,7 +22,7 @@ export default function Landing({
   }, [router]);
 
   if (isLoading) {
-    return <div></div>;
+    return <div></div>;  
   }
   return (
     <div className="bg-[#F0F4F4] flex">
