@@ -192,16 +192,22 @@ export class AuthService {
       }
     });
 
+    console.log(foundUser);
+
     const foundUserWithPhone = await this.databaseService.user.findUnique({
       where: {
         phone: number
       }
     });
 
-    if (foundUserWithPhone.id !== foundUser.id) {
-      throw new ForbiddenException(
-        "Phone number is already registered with another account"
-      );
+    console.log(foundUserWithPhone);
+
+    if (foundUserWithPhone !== null) {
+      if (foundUserWithPhone.id !== foundUser.id) {
+        throw new ForbiddenException(
+          "Phone number is already registered with another account"
+        );
+      }
     }
 
     const otp = await sendOTP(number);
