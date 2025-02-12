@@ -106,7 +106,7 @@ export default function Benefits() {
               <p className="text-xs font-light  leading-[1.2rem]">
                 Discover a variety of tutorials, eBooks, videos, and true crime
                 incident reports. Learn how to report crimes and what to do in
-                case you're in danger.
+                case you&apos;re in danger.
               </p>
             </div>
           </div>
@@ -123,7 +123,7 @@ export default function Benefits() {
               <h1 className="text-lg font-bold">24/7 Support</h1>
               <p className="text-xs font-light  leading-[1.2rem]">
                 Have questions? Feeling endangered? We have a rescue team
-                dedicated to make your feel safer. Call us and we'll reach you
+                dedicated to make your feel safer. Call us and we&apos;ll reach you
                 before the danger.
               </p>
             </div>

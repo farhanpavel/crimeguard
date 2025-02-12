@@ -39,7 +39,7 @@ export default function BottomCard() {
             <AnimatedNumber target={500} />
             <h1 className="text-xs font-semibold ">Criminals Captured</h1>
             <p className="text-md">
-              It's not only about reporting the crime. We make sure to reach the
+              It&apos;s not only about reporting the crime. We make sure to reach the
               right authority.
             </p>
           </div>

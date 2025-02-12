@@ -23,6 +23,18 @@ export class FirebaseService {
       });
   }
 
+  async subscribeToTopic(token: string, topic: string) {
+    return await admin
+      .messaging()
+      .subscribeToTopic([token], topic)
+      .then((response) => {
+        return {
+          message: "Successfully subscribed to topic:",
+          response: response
+        };
+      });
+  }
+
   async sendNotificationToTopic(
     topic: string,
     data: any,
@@ -48,6 +60,13 @@ export class FirebaseService {
       topic: "test",
       android: {
         priority: "high"
+      },
+      webpush: {
+        notification: {
+          title: "Hello, World!",
+          body: "This is a test notification!",
+          icon: "https://i.imgur"
+        }
       },
       notification: {
         title: "Hello, World!",
@@ -82,7 +101,6 @@ export class FirebaseService {
       });
   }
 
-
   async validateToken(token: string) {
     console.log("Validating token:", token);
     return await admin
@@ -115,6 +133,4 @@ export class FirebaseService {
         });
       });
   }
-
-
 }

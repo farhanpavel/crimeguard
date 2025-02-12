@@ -7,6 +7,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { ActionsCell } from "./data";
 import { url } from "@/components/Url/page";
 // import LoadingSpinner from "@/components/Loader/page";
+import ScaleLoader from "react-spinners/ScaleLoader";
 export type userData = {
   id: string;
   email: string;
