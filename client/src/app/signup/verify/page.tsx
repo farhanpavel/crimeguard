@@ -1,83 +1,110 @@
-"use client"
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import Link from 'next/link'
-import React from 'react'
-import { z } from 'zod'
-import Cookies from 'js-cookie'
-import { useRouter } from 'next/navigation'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { url } from '@/components/Url/page'
+"use client";
 
-const formSchema = z
-  .object({
-    name: z
-      .string()
-      .min(2, { message: "Name must be at least 2 characters long" }),
-    email: z.string().email({ message: "Invalid email address" }),
-    password: z
-      .string()
-      .min(6, { message: "Password must be at least 6 characters long" })
-      .regex(/[a-zA-Z0-9]/, { message: "Password must be alphanumeric" }),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    path: ["confirmPassword"],
-    message: "Passwords do not match",
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { PhoneInput } from "@/components/ui/phone-input";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { url } from "@/components/Url/page";
+import Cookies from "js-cookie";
+import { useRouter } from "next/navigation";
+// Phone number schema validation
+const formSchema = z.object({
+  phone: z
+    .string()
+    .min(10, { message: "Phone number must be at least 10 characters" }),
+});
+
+async function refreshAccessToken(refreshToken: string) {
+  const response = await fetch(`${url}/auth/refresh`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ refreshToken }),
   });
 
-const VerifyPagePreview = () => {
-    const router = useRouter();
+  if (!response.ok) {
+    throw new Error("Failed to refresh access token.");
+  }
+
+  const result = await response.json();
+  return result.accessToken;
+}
+
+export default function ForgetPasswordPreview() {
+  const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
+      phone: "",
     },
   });
 
+  const accessToken = Cookies.get("accessToken");
+  const refreshToken = Cookies.get("refreshToken");
+
   async function handleSubmit(values: z.infer<typeof formSchema>) {
     try {
-      const response = await fetch(`${url}/auth/local/register`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: values.name,
-          email: values.email,
-          password: values.password,
-        }),
+      let token = accessToken;
+
+      if (!accessToken && refreshToken) {
+        token = await refreshAccessToken(refreshToken);
+        if (token) {
+          Cookies.set("accessToken", token);
+        }
+      }
+
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+      };
+
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+      console.log(values.phone);
+      const response = await fetch(`${url}/auth/add-phone`, {
+        method: "PUT",
+        headers,
+        body: JSON.stringify({ phone: values.phone }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to register. Please try again.");
+        throw new Error("Failed to send OTP. Please try again.");
       }
 
       const result = await response.json();
-      Cookies.set("accessToken", result.accessToken);
-      Cookies.set("refreshToken", result.refreshToken);
-
-      alert("Registration successful!");
-      router.push("/signup/verify");
+      alert("OTP sent successfully!");
+      router.push("/signup/verify/otp");
       console.log("Response:", result);
     } catch (error) {
       console.error("Error submitting form:", error);
       alert("Failed to submit the form. Please try again.");
     }
   }
+
   return (
     <div className="flex min-h-screen h-full w-full items-center justify-center px-4">
       <Card className="mx-auto max-w-sm">
         <CardHeader>
-          <CardTitle className="text-2xl">Register</CardTitle>
+          <CardTitle className="text-2xl">Verification</CardTitle>
           <CardDescription>
-            Create a new account by filling out the form below.
+            Enter your phone number to receive an OTP for password recovery.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -87,107 +114,48 @@ const VerifyPagePreview = () => {
               className="space-y-8"
             >
               <div className="grid gap-4">
-                {/* Name Field */}
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem className="grid gap-2">
-                      <FormLabel htmlFor="name">Full Name</FormLabel>
-                      <FormControl>
-                        <Input id="name" placeholder="John Doe" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Email Field */}
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem className="grid gap-2">
-                      <FormLabel htmlFor="email">Email</FormLabel>
-                      <FormControl>
-                        <Input
-                          id="email"
-                          placeholder="johndoe@mail.com"
-                          type="email"
-                          autoComplete="email"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
                 {/* Phone Field */}
-
-                {/* Password Field */}
                 <FormField
                   control={form.control}
-                  name="password"
+                  name="phone"
                   render={({ field }) => (
                     <FormItem className="grid gap-2">
-                      <FormLabel htmlFor="password">Password</FormLabel>
+                      <FormLabel htmlFor="phone">Mobile Number</FormLabel>
                       <FormControl>
-                        <Input
-                          id="password"
-                          placeholder="******"
-                          autoComplete="new-password"
-                          type="password"
+                        <PhoneInput
+                          id="phone"
+                          placeholder="01*******"
                           {...field}
+                          defaultCountry="BD"
                         />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-
-                {/* Confirm Password Field */}
-                <FormField
-                  control={form.control}
-                  name="confirmPassword"
-                  render={({ field }) => (
-                    <FormItem className="grid gap-2">
-                      <FormLabel htmlFor="confirmPassword">
-                        Confirm Password
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          id="confirmPassword"
-                          placeholder="******"
-                          autoComplete="new-password"
-                          type="password"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <Button
-                  type="submit"
-                  className="w-full bg-head hover:bg-green-800"
-                >
-                  Register
-                </Button>
+                <div className="flex gap-x-3">
+                  <Button
+                    type="submit"
+                    className="bg-green-500 text-white w-full"
+                  >
+                    Send OTP
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    className="bg-gray-200 text-black w-full"
+                    onClick={() => {
+                      router.push("/signin");
+                    }}
+                  >
+                    Skip
+                  </Button>
+                </div>
               </div>
             </form>
           </Form>
-          <div className="mt-4 text-center text-sm">
-            Already have an account?{" "}
-            <Link href="/signin" className="underline">
-              Login
-            </Link>
-          </div>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
-
-export default VerifyPagePreview
