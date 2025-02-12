@@ -7,8 +7,14 @@ import {
   SetStateAction,
   useEffect,
 } from "react";
-import { messaging } from "../Firebase/page";
-import { onMessage } from "firebase/messaging";
+import { io } from "socket.io-client";
+import FcmTokenComp from "../Firebase/page";
+import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer, toast } from "react-toastify";
+import Cookies from "js-cookie";
+
+const socket = io("ws://localhost:1337");
+
 export type UserData = {
   id: string;
   email: string;
@@ -41,17 +47,43 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
-//   useEffect(() => {
-//     if(messaging){
-//         onMessage(messaging,(payload)=>{
-//             console.log("FCM Got",payload)
-//         })
-//     }
-//     else{
-//         alert('exist korena')
-//     }
-//   }, [])
+ 
+
+  useEffect(() => {
   
+    // Request permission for notifications
+    if (Notification.permission !== "granted") {
+      Notification.requestPermission();
+    }
+
+    socket.on("news", (data) => {
+      console.log("Received:", data);
+
+      // Show browser notification if permission is granted
+      if (Notification.permission === "granted") {
+        new Notification(data.title, {
+          body: data.content
+        });
+      }
+      toast.info(`${data.title}: ${data.content}`);
+    });
+    const userId = Cookies.get("userId");
+    if (userId) {
+      socket.on(userId, (data) => {
+        console.log("Received:", data);
+
+        // Show browser notification if permission is granted
+        if (Notification.permission === "granted") {
+          new Notification(data.title, {
+            body: data.content
+          });
+        }
+        toast.info(`${data.title}: ${data.content}`);
+      });
+    }
+
+    socket.emit("subscribeTopic", "news");
+  }, []);
 
   return (
     <UserContext.Provider value={{ users, setUsers, updateUserStatus }}>

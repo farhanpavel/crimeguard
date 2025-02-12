@@ -78,6 +78,7 @@ export default function LoginPreview() {
       alert("Login successful!");
       Cookies.set("accessToken", result.accessToken);
       Cookies.set("refreshToken", result.refreshToken);
+      Cookies.set("userId", result.id);
       Cookies.set("role", result.role);
       if (result.role === "ADMIN") {
         router.push("/admindashboard/overview");
