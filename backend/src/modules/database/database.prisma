@@ -19,12 +19,13 @@ model User {
   isBanned      Boolean        @default(false)
   deleted       Boolean        @default(false)
   isVerified    Boolean        @default(false)
-  otp           Int?
+  otp           String?
   division      String?
   district      String?
   thana         String?
   refreshToken  String?
   registeredAt  DateTime       @default(now())
+  notifications Notifcaiton[]
   crimes        CrimeReport[]
   comments      Comment[]
   votes         Vote[]
@@ -42,6 +43,7 @@ model CrimeReport {
   crimeTime    DateTime
   postTime     DateTime      @default(now())
   userId       String
+  isAnnonymous Boolean       @default(false)
   user         User          @relation(fields: [userId], references: [id])
   media        Media[]
   comments     Comment[]
@@ -84,8 +86,18 @@ model Vote {
   user      User         @relation(fields: [userId], references: [id])
   report    CrimeReport  @relation(fields: [reportId], references: [id])
 
-  @@unique([userId, reportId])
   @@map("votes")
+}
+
+model Notifcaiton {
+  id        String   @id @default(uuid())
+  title     String
+  body      String
+  userId    String
+  read      Boolean  @default(false)
+  timestamp DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  @@map("notifications")
 }
 
 enum Role {

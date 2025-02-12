@@ -4,7 +4,9 @@ import {
   IsString,
   IsDate,
   IsArray,
-  ValidateNested
+  ValidateNested,
+  IsBoolean,
+  IsOptional
 } from "class-validator";
 import { Type } from "class-transformer";
 
@@ -28,6 +30,10 @@ export class CreateReportDto {
 
   @IsString()
   district: string;
+
+  @IsBoolean()
+  @IsOptional()
+  isAnonymous: boolean;
 
   @IsDate()
   @Type(() => Date)

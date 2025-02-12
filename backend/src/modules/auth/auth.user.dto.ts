@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsBoolean, IsInt } from "class-validator";
+import { IsString, IsOptional, IsBoolean } from "class-validator";
 import { PartialType } from "@nestjs/swagger";
 
 export class CompleteProfileDto {
@@ -20,10 +20,6 @@ export class CompleteProfileDto {
   @IsOptional()
   @IsBoolean()
   isVerified?: boolean = false;
-
-  @IsOptional()
-  @IsInt()
-  otp?: number;
 
   @IsOptional()
   @IsString()
