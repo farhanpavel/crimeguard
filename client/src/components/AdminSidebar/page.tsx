@@ -12,7 +12,7 @@ import { LuCreditCard } from "react-icons/lu";
 import { AiFillAppstore } from "react-icons/ai";
 import Image from "next/image";
 import { LuLogOut } from "react-icons/lu";
-
+import Cookies from "js-cookie";
 type NavItem = {
   title: string;
   href: string;
@@ -36,7 +36,11 @@ export default function AdminSidebar() {
   const path = usePathname();
   const searchParams = useSearchParams();
   const tripPlanId = searchParams.get("tripPlanId");
-
+  const handleCookies = () => {
+    Cookies.remove("role");
+    Cookies.remove("accessToken");
+    Cookies.remove("refreshToken");
+  };
   return (
     <div className="flex min-h-screen">
       <nav
@@ -47,7 +51,7 @@ export default function AdminSidebar() {
         }`}
       >
         <div className="flex flex-col h-full justify-between py-4">
-          <div className="overflow-y-auto">
+          <div className="overflow-hidden">
             <div className="mb-5 flex justify-center items-center">
               <Image
                 src={"/images/logo.png"}
@@ -101,7 +105,8 @@ export default function AdminSidebar() {
           {/* Logout Button at the End */}
           <div className="mt-auto">
             <Link
-              href="/logout"
+              href="/"
+              onClick={() => handleCookies()}
               className="group relative flex items-center  rounded-md px-3 py-2 text-sm font-medium hover:bg-green-100 hover:text-black transition-colors "
             >
               <div
