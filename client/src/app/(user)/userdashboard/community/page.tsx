@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { RiUserCommunityFill } from "react-icons/ri";
 import { FaSortUp, FaSortDown } from "react-icons/fa";
 import { LiaCommentsSolid } from "react-icons/lia";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { url } from "@/components/Url/page";
 import Cookies from "js-cookie";
@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AiTwotoneLike } from "react-icons/ai";
 import { AiTwotoneDislike } from "react-icons/ai";
+import Link from "next/link";
 export default function Page() {
   const [dataAll, setData] = useState([]);
   const [commenting, setCommenting] = useState(null);
@@ -19,36 +20,37 @@ export default function Page() {
   const [commentFile, setCommentFile] = useState(null);
   const [upvoteCount, setUpvoteCount] = useState(0); // State for upvote count
   const [downvoteCount, setDownvoteCount] = useState(0);
+  const fetchData = async () => {
+    try {
+      const response = await fetch(`${url}/report`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) throw new Error("Failed to fetch data");
+
+      const json = await response.json();
+      const data = json.data;
+      console.log(data);
+      const upvotes =
+        data?.votes?.filter((vote) => vote.voteType === "UPVOTE").length || 0;
+      const downvotes =
+        data?.votes?.filter((vote) => vote.voteType === "DOWNVOTE").length ||
+        0;
+
+      // Set state with the counts
+      setData(data);
+      setUpvoteCount(upvotes);
+      setDownvoteCount(downvotes);
+      setData(json.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch(`${url}/report`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (!response.ok) throw new Error("Failed to fetch data");
-
-        const json = await response.json();
-        const data = json.data;
-        console.log(data);
-        const upvotes =
-          data?.votes?.filter((vote) => vote.voteType === "UPVOTE").length || 0;
-        const downvotes =
-          data?.votes?.filter((vote) => vote.voteType === "DOWNVOTE").length ||
-          0;
-
-        // Set state with the counts
-        setData(data);
-        setUpvoteCount(upvotes);
-        setDownvoteCount(downvotes);
-        setData(json.data);
-      } catch (error) {
-        console.error(error);
-      }
-    };
+    
 
     fetchData();
   }, []);
@@ -116,6 +118,7 @@ export default function Page() {
       if (!response.ok) throw new Error(`Failed to ${type}`);
 
       alert(`${type} successful!`);
+      fetchData()
     } catch (error) {
       console.error(`Error in ${type}:`, error);
       alert(`Failed to ${type}. Please try again.`);
@@ -130,7 +133,7 @@ export default function Page() {
           <h1 className="text-2xl font-bold">Community</h1>
         </div>
         <p className="text-xs text-[#4a4a4a] border-[#d1cece] border-b-[2px] pb-4">
-          Manage all of your Post here!
+          All Post here!
         </p>
         {dataAll.map((report) => (
           <div
@@ -140,15 +143,15 @@ export default function Page() {
             <div className="flex space-x-2">
               <Avatar>
                 <AvatarImage
-                  src={report.user.profileImage || "/images/default-avatar.jpg"}
+                  src={report.isAnnonymous?"/images/default-avatar.jpg":report.user.profileImage || "/images/default-avatar.jpg"}
                   alt="User Profile"
                 />
-                <AvatarFallback>CN</AvatarFallback>
+                <AvatarFallback>A</AvatarFallback>
               </Avatar>
 
               <div className="font-bold space-y-1">
                 <h1 className="text-sm text-green-800 font-bold">
-                  {report.user.name}
+                  {report.isAnnonymous?"Anonymous User":report.user.name}
                 </h1>
                 <h2 className="text-lg text-[#4a4a4a] ">{report.title}</h2>
               </div>
@@ -182,10 +185,14 @@ export default function Page() {
               )}
               <div className="flex space-x-4 mt-3 mx-1">
                 <h1 className="flex items-center text-xs text-blue-700">
-                  <AiTwotoneLike />: {upvoteCount}
+                  <AiTwotoneLike />: {
+                    report.votes.filter(v=>v.voteType=="UPVOTE").length
+                  }
                 </h1>
                 <h1 className="flex items-center text-xs text-red-700">
-                  <AiTwotoneDislike />: {downvoteCount}
+                  <AiTwotoneDislike />: {
+                    report.votes.filter(v=>v.voteType=="DOWNVOTE").length
+                  }
                 </h1>
               </div>
               <div className="flex justify-between ">
@@ -214,9 +221,9 @@ export default function Page() {
                   </button>
                 </div>
                 <div>
-                  <Button className="bg-head hover:bg-green-500">
+                  <Link href={`/userdashboard/community/${report.id}`} className={buttonVariants({className:"bg-head hover:bg-green-500"})}>
                     View Details
-                  </Button>
+                  </Link>
                 </div>
               </div>
               {commenting === report.id && (

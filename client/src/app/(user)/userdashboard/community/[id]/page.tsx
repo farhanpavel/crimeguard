@@ -15,6 +15,7 @@ export interface ApiResponse {
     id: string
     title: string
     description: string
+    isAnnonymous:boolean
     division: string
     district: string
     hidden: boolean
@@ -79,6 +80,7 @@ const SinglePostPreview = () => {
         postTime: '',
         userId: '',
         media: [],
+        isAnnonymous:false,
         comments: [],
         user: {
             id: '',
@@ -152,11 +154,11 @@ const SinglePostPreview = () => {
                 <div className="flex flex-row items-center justify-between pt-10 pb-5">
                     <div className='flex items-center'>
                         <Avatar>
-                          <AvatarImage src={postDetails.user.profileImage} />
-                          <AvatarFallback>{postDetails.user.name.substring(0,1)}</AvatarFallback>
+                          <AvatarImage src={postDetails.isAnnonymous?"Anonymous User":postDetails.user.profileImage} />
+                          <AvatarFallback>{postDetails.isAnnonymous?"A":postDetails.user.name.substring(0,1)}</AvatarFallback>
                         </Avatar>   
                         <div className='ml-2'>
-                            <p className="font-bold text-green-600">{postDetails.user.name}</p>
+                            <p className="font-bold text-green-600">{postDetails.isAnnonymous?"Anonymous User":postDetails.user.name}</p>
                             <p className="text-xs text-gray-600">{postDetails.user.role}</p>
                         </div>
                     </div>
@@ -187,12 +189,13 @@ const SinglePostPreview = () => {
                             {
                                 postDetails.votes.filter((v)=>v.voteType=="UPVOTE").map((v,i)=>{
                                     const user:User = v.user;
+                                    console.log(user)
                                     return<div className='flex items-center gap-3 my-3'>
                                         <Avatar>
-                                          <AvatarImage src={user.profileImage} />
-                                          <AvatarFallback>{user.name.substring(0,1)}</AvatarFallback>
+                                          {/* <AvatarImage src={user.profileImage} />
+                                          <AvatarFallback>{user.name.substring(0,1)}</AvatarFallback> */}
                                         </Avatar>
-                                        <p className='text-green-600'>{user.name}</p>
+                                        {/* <p className='text-green-600'>{user.name}</p> */}
                                     </div>
                                 })
                             }
@@ -219,12 +222,13 @@ const SinglePostPreview = () => {
                             {
                                 postDetails.votes.filter((v)=>v.voteType=="DOWNVOTE").map((v,i)=>{
                                     const user:User = v.user;
+                                    console.log(v)
                                     return<div className='flex items-center gap-3 my-3'>
-                                        <Avatar>
+                                        {/* <Avatar>
                                           <AvatarImage src={user.profileImage} />
                                           <AvatarFallback>{user.name.substring(0,1)}</AvatarFallback>
                                         </Avatar>
-                                        <p className='text-green-600'>{user.name}</p>
+                                        <p className='text-green-600'>{user.name}</p> */}
                                     </div>
                                 })
                             }
