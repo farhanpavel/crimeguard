@@ -1,12 +1,10 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+
+import Link from "next/link";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+
 import {
   Form,
   FormControl,
@@ -15,25 +13,29 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { url } from "@/components/Url/page";
-import { zodResolver } from "@hookform/resolvers/zod";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+import Cookies from "js-cookie";
+import { useEffect, useState } from "react";
+const formSchema = z.object({
+  email: z.string().email({ message: "Invalid email address" }),
+  password: z
+    .string()
+    .min(6, { message: "Password must be at least 6 characters long" })
+    .regex(/[a-zA-Z0-9]/, { message: "Password must be alphanumeric" }),
+});
 
-const LoginPreview = () => {
+export default function LoginPreview() {
   const router = useRouter();
-
-  const formSchema = z.object({
-    email: z.string().email({ message: "Invalid email address" }),
-    password: z
-      .string()
-      .min(6, { message: "Password must be at least 6 characters long" })
-      .regex(/[a-zA-Z0-9]/, { message: "Password must be alphanumeric" }),
-  });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -42,6 +44,20 @@ const LoginPreview = () => {
       password: "",
     },
   });
+  const [isLoading, setLoading] = useState(true);
+  useEffect(() => {
+    const role = Cookies.get("role");
+    if (role === "ADMIN") {
+      router.push("/admindashboard/overview");
+    } else if (role === "USER") {
+      router.push("/userdashboard/overview");
+    } else {
+      setLoading(false);
+    }
+  });
+  if (isLoading) {
+    return <div></div>;
+  }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
@@ -60,7 +76,14 @@ const LoginPreview = () => {
       const result = await response.json();
       console.log("Response:", result);
       alert("Registration successful!");
-      router.push("/admindashboard");
+      Cookies.set("accessToken", result.accessToken);
+      Cookies.set("refreshToken", result.refreshToken);
+      Cookies.set("role", result.role);
+      if (result.role === "ADMIN") {
+        router.push("/admindashboard/overview");
+      } else {
+        router.push("/userdashboard/overview");
+      }
     } catch (error) {
       console.error("Error submitting form:", error);
       alert("Failed to submit the form. Please try again.");
@@ -149,6 +172,4 @@ const LoginPreview = () => {
       </Card>
     </div>
   );
-};
-
-export default LoginPreview;
+}

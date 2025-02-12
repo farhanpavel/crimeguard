@@ -1,12 +1,11 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+
+import Link from "next/link";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+
+import Cookies from "js-cookie";
 import {
   Form,
   FormControl,
@@ -15,15 +14,18 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { url } from "@/components/Url/page";
-import Link from "next/link";
-import React from "react";
-import { z } from "zod";
-import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect, useState } from "react";
 
 const formSchema = z
   .object({
@@ -41,7 +43,8 @@ const formSchema = z
     path: ["confirmPassword"],
     message: "Passwords do not match",
   });
-const RegisterPreview = () => {
+
+export default function RegisterPreview() {
   const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -52,7 +55,20 @@ const RegisterPreview = () => {
       confirmPassword: "",
     },
   });
-
+  const [isLoading, setLoading] = useState(true);
+  useEffect(() => {
+    const role = Cookies.get("role");
+    if (role === "ADMIN") {
+      router.push("/admindashboard/overview");
+    } else if (role === "USER") {
+      router.push("/userdashboard/overview");
+    } else {
+      setLoading(false);
+    }
+  });
+  if (isLoading) {
+    return <div></div>;
+  }
   async function handleSubmit(values: z.infer<typeof formSchema>) {
     try {
       const response = await fetch(`${url}/auth/local/register`, {
@@ -83,6 +99,7 @@ const RegisterPreview = () => {
       alert("Failed to submit the form. Please try again.");
     }
   }
+
   return (
     <div className="flex min-h-screen h-full w-full items-center justify-center px-4">
       <Card className="mx-auto max-w-sm">
@@ -192,7 +209,7 @@ const RegisterPreview = () => {
           </Form>
           <div className="mt-4 text-center text-sm">
             Already have an account?{" "}
-            <Link href="/signin" className="underline">
+            <Link href="#" className="underline">
               Login
             </Link>
           </div>
@@ -200,6 +217,4 @@ const RegisterPreview = () => {
       </Card>
     </div>
   );
-};
-
-export default RegisterPreview;
+}
