@@ -21,7 +21,7 @@ import {
 import { Button } from "@/components/ui/button";
 import ScaleLoader from "react-spinners/ScaleLoader";
 import { useUserContext } from "@/components/tableContext/page"; // Import the context
-
+import Cookies from "js-cookie";
 export type userData = {
   id: string;
   email: string;
@@ -50,9 +50,7 @@ export const ActionsCell: React.FC<{ user: userData }> = ({ user }) => {
   const handleBanned = async () => {
     setLoading(true);
     try {
-      const token =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjM0NTY2NDM4LTZjNGItNDI4OS04ZGZiLWI5Yjc2MjRlMTVmNCIsImlhdCI6MTczOTIwODk0MSwiZXhwIjoxNzM5ODEzNzQxfQ.ttWtamlCajMnCOGm625qUQMyOvwn-6x8K5Aa-jZoxx0";
-
+      const token = Cookies.get("accessToken");
       const endpoint = isBanned
         ? `${url}/admin/unban/${user.id}`
         : `${url}/admin/ban/${user.id}`;
