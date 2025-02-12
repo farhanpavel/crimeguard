@@ -1,0 +1,104 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(uuid())
+  email         String         @unique
+  name          String
+  phone         String?        @unique
+  password      String
+  profileImage  String?
+  bio           String?
+  role          Role           @default(USER)
+  isBanned      Boolean        @default(false)
+  deleted       Boolean        @default(false)
+  isVerified    Boolean        @default(false)
+  otp           Int?
+  division      String?
+  district      String?
+  thana         String?
+  refreshToken  String?
+  registeredAt  DateTime       @default(now())
+  crimes        CrimeReport[]
+  comments      Comment[]
+  votes         Vote[]
+
+  @@map("users")
+}
+
+model CrimeReport {
+  id           String        @id @default(uuid())
+  title        String
+  description  String
+  division     String
+  district     String
+  hidden       Boolean       @default(false)
+  crimeTime    DateTime
+  postTime     DateTime      @default(now())
+  userId       String
+  user         User          @relation(fields: [userId], references: [id])
+  media        Media[]
+  comments     Comment[]
+  votes        Vote[]
+
+  @@map("crime_reports")
+}
+
+model Media {
+  id         String       @id @default(uuid())
+  type       MediaType
+  url        String
+  report     CrimeReport? @relation(fields: [reportId], references: [id])
+  reportId   String?
+  comment    Comment?     @relation(fields: [commentId], references: [id])
+  commentId  String?
+
+  @@map("media")
+}
+
+model Comment {
+  id         String       @id @default(uuid())
+  text       String
+  userId     String
+  reportId   String
+  hidden     Boolean      @default(false)
+  createdAt  DateTime     @default(now())
+  user       User         @relation(fields: [userId], references: [id])
+  report     CrimeReport  @relation(fields: [reportId], references: [id])
+  media      Media[]
+
+  @@map("comments")
+}
+
+model Vote {
+  id        String       @id @default(uuid())
+  voteType  VoteType
+  userId    String
+  reportId  String
+  user      User         @relation(fields: [userId], references: [id])
+  report    CrimeReport  @relation(fields: [reportId], references: [id])
+
+  @@unique([userId, reportId])
+  @@map("votes")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+}
+
+enum VoteType {
+  UPVOTE
+  DOWNVOTE
+}
