@@ -6,6 +6,7 @@ import { AuthModule } from "../auth/auth.module";
 import { MediaModule } from "../media/media.module";
 import { CommentModule } from "../comment/comment.module";
 import { AdminModule } from "../admin/admin.module";
+import { ReportModule } from "../report/report.module";
 
 @Module({
   imports: [
@@ -16,7 +17,8 @@ import { AdminModule } from "../admin/admin.module";
     AuthModule,
     AdminModule,
     MediaModule,
-    CommentModule
+    CommentModule,
+    ReportModule
   ],
   controllers: [AppController],
   providers: [AppService]
