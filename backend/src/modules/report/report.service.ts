@@ -202,14 +202,14 @@ export class ReportService {
 
     this.socketGateway.sendMessage(`${report.userId}`, {
       title: `New Vote`,
-      content: `${user.name} downvoted your report`,
+      content: `${user.name} upvoted your report`,
       date: new Date().toISOString()
     });
 
     await this.databaseService.notifcaiton.create({
       data: {
         title: `New Vote`,
-        body: `${user.name} downvoted your report`,
+        body: `${user.name} upvoted your report`,
         userId: report.userId
       }
     });
