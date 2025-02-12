@@ -1,25 +1,39 @@
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { zodResolver } from '@hookform/resolvers/zod'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import React from 'react'
-import { useForm } from 'react-hook-form'
-import { z } from 'zod'
+"use client";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { url } from "@/components/Url/page";
+import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import React from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 const LoginPreview = () => {
-    const router = useRouter();
-    
-    const formSchema = z.object({
-      email: z.string().email({ message: "Invalid email address" }),
-      password: z
-        .string()
-        .min(6, { message: "Password must be at least 6 characters long" })
-        .regex(/[a-zA-Z0-9]/, { message: "Password must be alphanumeric" }),
-    });
+  const router = useRouter();
 
+  const formSchema = z.object({
+    email: z.string().email({ message: "Invalid email address" }),
+    password: z
+      .string()
+      .min(6, { message: "Password must be at least 6 characters long" })
+      .regex(/[a-zA-Z0-9]/, { message: "Password must be alphanumeric" }),
+  });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -31,7 +45,7 @@ const LoginPreview = () => {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      const response = await fetch(`${'url'}/auth/local/login`, {
+      const response = await fetch(`${url}/auth/local/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -62,7 +76,7 @@ const LoginPreview = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {/* <Form {...form}>
+          <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               <div className="grid gap-4">
                 <FormField
@@ -113,7 +127,7 @@ const LoginPreview = () => {
                 </Button>
               </div>
             </form>
-          </Form> */}
+          </Form>
 
           <div className="mt-4 text-center text-sm space-y-3">
             <div>
@@ -134,7 +148,7 @@ const LoginPreview = () => {
         </CardContent>
       </Card>
     </div>
-  )
-}
+  );
+};
 
-export default LoginPreview
+export default LoginPreview;
