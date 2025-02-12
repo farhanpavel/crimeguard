@@ -68,6 +68,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       toast.info(`${data.title}: ${data.content}`);
     });
     const userId = Cookies.get("userId");
+    console.log(userId);
     if (userId) {
       socket.on(userId, (data) => {
         console.log("Received:", data);
