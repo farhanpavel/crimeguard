@@ -7,6 +7,9 @@ import { DatabaseService } from "../database/database.service";
 export class ReportService {
   constructor(private readonly databaseService: DatabaseService) {}
   async post(userId: string, createReportDto: CreateReportDto) {
+    if(createReportDto.isAnonymous === null || createReportDto.isAnonymous === undefined){
+      createReportDto.isAnonymous = false;
+    }
     const report = await this.databaseService.crimeReport.create({
       data: {
         crimeTime: createReportDto.crimeTime,
@@ -15,6 +18,7 @@ export class ReportService {
         district: createReportDto.district,
         title: createReportDto.title,
         userId: userId,
+        isAnnonymous: createReportDto.isAnonymous,
         media: {
           create: createReportDto.media
         }
@@ -70,6 +74,7 @@ export class ReportService {
       where: { ...filters, hidden: false },
       include: {
         user: true,
+        media:true,
         votes: true,
         comments: {
           include: {

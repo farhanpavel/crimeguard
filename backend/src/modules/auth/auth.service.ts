@@ -160,6 +160,15 @@ export class AuthService {
     });
   }
 
+  async generateOTPToken(payload: AccessToken) {
+    const otpToken = await this.jwtService.signAsync(payload, {
+      secret: this.configService.get<string>("ACCESS_KEY"),
+      expiresIn: "3m"
+    });
+
+    return otpToken;
+  }
+
   async generateTokens(payload: AccessToken) {
     const accessToken = await this.jwtService.signAsync(payload, {
       secret: this.configService.get<string>("ACCESS_KEY"),
@@ -186,28 +195,19 @@ export class AuthService {
     if (!number) {
       throw new ForbiddenException("Phone number is required");
     }
-    const foundUser = await this.databaseService.user.findUnique({
-      where: {
-        id: id
-      }
-    });
 
-    console.log(foundUser);
+    const foundUser = await this.databaseService.user.findUnique({
+      where: { id: id }
+    });
 
     const foundUserWithPhone = await this.databaseService.user.findUnique({
-      where: {
-        phone: number
-      }
+      where: { phone: number }
     });
 
-    console.log(foundUserWithPhone);
-
-    if (foundUserWithPhone !== null) {
-      if (foundUserWithPhone.id !== foundUser.id) {
-        throw new ForbiddenException(
-          "Phone number is already registered with another account"
-        );
-      }
+    if (foundUserWithPhone !== null && foundUserWithPhone.id !== foundUser.id) {
+      throw new ForbiddenException(
+        "Phone number is already registered with another account"
+      );
     }
 
     const otp = await sendOTP(number);
@@ -217,14 +217,19 @@ export class AuthService {
       throw new ForbiddenException("Error sending OTP");
     }
 
-    await this.databaseService.user.update({
-      where: {
-        id: id
-      },
-      data: {
-        phone: number,
-        otp: otp
+    // Generate OTP token with expiration time
+    const otpToken = await this.jwtService.signAsync(
+      { otp, userId: id },
+      {
+        secret: this.configService.get<string>("OTP_KEY"),
+        expiresIn: "3m" // OTP expires in 3 minutes
       }
+    );
+
+    // Store the OTP token in the database
+    await this.databaseService.user.update({
+      where: { id: id },
+      data: { phone: number, otp: otpToken }
     });
 
     return {
@@ -236,70 +241,93 @@ export class AuthService {
     if (!otp) {
       throw new ForbiddenException("OTP is required");
     }
+
     const foundUser = await this.databaseService.user.findUnique({
-      where: {
-        id: id
-      }
+      where: { id: id }
     });
+
     if (!foundUser.phone) {
       throw new ForbiddenException("Phone number is not added");
     }
-    if (foundUser.otp !== otp) {
+
+    if (!foundUser.otp) {
+      throw new ForbiddenException("OTP token not found");
+    }
+
+    try {
+      // Verify the OTP token
+      const decoded = await this.jwtService.verifyAsync(foundUser.otp, {
+        secret: this.configService.get<string>("OTP_KEY")
+      });
+
+      // Check if the OTP matches
+      if (decoded.otp !== otp || decoded.userId !== id) {
+        throw new ForbiddenException("Invalid OTP");
+      }
+
+      // Update user's verification status
+      await this.databaseService.user.update({
+        where: { id: id },
+        data: { otp: null, isVerified: true }
+      });
+
+      return {
+        message: "Phone number verified successfully"
+      };
+    } catch (error) {
+      if (error.name === "TokenExpiredError") {
+        throw new ForbiddenException("OTP has expired");
+      }
       throw new ForbiddenException("Invalid OTP");
     }
-    await this.databaseService.user.update({
-      where: {
-        id: id
-      },
-      data: {
-        otp: null,
-        isVerified: true
-      }
-    });
-
-    return {
-      message: "Phone number verified successfully"
-    };
   }
 
   async forgotPassword(phone: string, toPhone: boolean) {
     if (!phone) {
-      throw new ForbiddenException("Email is required");
+      throw new ForbiddenException("Phone number is required");
     }
+
     const foundUser = await this.databaseService.user.findUnique({
-      where: {
-        phone: phone
-      }
+      where: { phone: phone }
     });
+
     if (!foundUser) {
       throw new ForbiddenException("User is not registered");
     }
+
     let otp;
 
     if (toPhone) {
       if (!foundUser.phone) {
         throw new ForbiddenException("Phone number is not added");
       }
-      //send otp to phone number
+
+      // Send OTP to phone number
       otp = await sendOTP(foundUser.phone);
       if (typeof otp !== "number") {
         throw new ForbiddenException("Error sending OTP");
       }
     } else {
-      //send otp to email
+      // Send OTP to email (not implemented here)
     }
 
-    await this.databaseService.user.update({
-      where: {
-        id: foundUser.id
-      },
-      data: {
-        otp: otp
+    // Generate OTP token with expiration time
+    const otpToken = await this.jwtService.signAsync(
+      { otp, userId: foundUser.id },
+      {
+        secret: this.configService.get<string>("OTP_KEY"),
+        expiresIn: "3m" // OTP expires in 3 minutes
       }
+    );
+
+    // Store the OTP token in the database
+    await this.databaseService.user.update({
+      where: { id: foundUser.id },
+      data: { otp: otpToken }
     });
 
     return {
-      message: "OTP sent to your email/phone number"
+      message: "OTP sent to your phone number"
     };
   }
 
@@ -313,30 +341,48 @@ export class AuthService {
     if (!otp) {
       throw new ForbiddenException("OTP is required");
     }
+
     const foundUser = await this.databaseService.user.findUnique({
-      where: {
-        email: email
-      }
+      where: { email: email }
     });
+
     if (!foundUser) {
       throw new ForbiddenException("User is not registered");
     }
-    if (foundUser.otp !== otp) {
+
+    if (!foundUser.otp) {
+      throw new ForbiddenException("OTP token not found");
+    }
+
+    try {
+      // Verify the OTP token
+      const decoded = await this.jwtService.verifyAsync(foundUser.otp, {
+        secret: this.configService.get<string>("OTP_KEY")
+      });
+
+      // Check if the OTP matches
+      if (decoded.otp !== otp || decoded.userId !== foundUser.id) {
+        throw new ForbiddenException("Invalid OTP");
+      }
+
+      // Update user's password and clear OTP token
+      await this.databaseService.user.update({
+        where: { id: foundUser.id },
+        data: {
+          password: await this.createHash(password),
+          otp: null
+        }
+      });
+
+      return {
+        message: "Password reset successfully"
+      };
+    } catch (error) {
+      if (error.name === "TokenExpiredError") {
+        throw new ForbiddenException("OTP has expired");
+      }
       throw new ForbiddenException("Invalid OTP");
     }
-    await this.databaseService.user.update({
-      where: {
-        id: foundUser.id
-      },
-      data: {
-        password: await this.createHash(password),
-        otp: null
-      }
-    });
-
-    return {
-      message: "Password reset successfully"
-    };
   }
 
   async completeProfile(
